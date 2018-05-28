@@ -42,6 +42,7 @@ unsigned long read_value(unsigned long a_addr);
 unsigned long* read_values(unsigned long a_addr, unsigned long* a_values_buffer, unsigned long a_len);
 void write_value(unsigned long a_addr, unsigned long a_value);
 void write_value2(unsigned long a_addr, unsigned long a_value, unsigned long b_addr, unsigned long b_value);
+void write_value3(unsigned long a_addr, unsigned long a_value, unsigned long b_addr, unsigned long b_value, unsigned long c_addr, unsigned long c_value);
 void write_values(unsigned long a_addr, unsigned long* a_values, unsigned long a_len);
 
 void* map_base = (void*)(-1);
@@ -159,6 +160,56 @@ void write_value2(unsigned long a_addr, unsigned long a_value, unsigned long b_a
                 close(fd);
         }
 }
+
+void write_value3(unsigned long a_addr, unsigned long a_value, unsigned long b_addr, unsigned long b_value, unsigned long c_addr, unsigned long c_value) {
+    int fd = -1;
+    if((fd = open("/dev/mem", O_RDWR | O_SYNC)) == -1) FATAL;
+
+    map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, a_addr & ~MAP_MASK);
+
+        if(map_base == (void *) -1) FATAL;
+
+        void* virt_addr = map_base + (a_addr & MAP_MASK);
+
+        *((unsigned long *) virt_addr) = a_value;
+
+        if (map_base != (void*)(-1)) {
+                if(munmap(map_base, MAP_SIZE) == -1) FATAL;
+                map_base = (void*)(-1);
+        }
+
+    map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, b_addr & ~MAP_MASK);
+
+        if(map_base == (void *) -1) FATAL;
+
+        void* virt_addr2 = map_base + (b_addr & MAP_MASK);
+
+        *((unsigned long *) virt_addr2) = b_value;
+
+        if (map_base != (void*)(-1)) {
+                if(munmap(map_base, MAP_SIZE) == -1) FATAL;
+                map_base = (void*)(-1);
+        }
+
+    map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, c_addr & ~MAP_MASK);
+
+        if(map_base == (void *) -1) FATAL;
+
+        void* virt_addr3 = map_base + (c_addr & MAP_MASK);
+
+        *((unsigned long *) virt_addr3) = c_value;
+
+        if (map_base != (void*)(-1)) {
+                if(munmap(map_base, MAP_SIZE) == -1) FATAL;
+                map_base = (void*)(-1);
+        }
+
+
+        if (fd != -1) {
+                close(fd);
+        }
+}
+
 
 
 void write_values(unsigned long a_addr, unsigned long* a_values, unsigned long a_len) {
