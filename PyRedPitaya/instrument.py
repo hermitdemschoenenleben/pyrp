@@ -468,7 +468,7 @@ class ASG(MemoryInterface):
 class Pid(MemoryInterface):
     def __init__(self, addr_base = 0x40300000, number="11", **kwd):
         kwd["addr_base"] = addr_base
-        super(Pid, self).__init__(self, **kwd())
+        super(Pid, self).__init__(**kwd)
         if number=="11":
             self.pidnumber=0
         elif number=="12":
